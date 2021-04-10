@@ -1,0 +1,76 @@
+#Options +FollowSymlinks
+#Options -MultiViews
+
+RewriteEngine On
+
+RewriteRule ^about$ about.html [NC]
+
+RewriteRule ^active/?(.*)$ index.php?md=serials&mod=active&QSA=$1 [NC,L,QSA]
+
+#Products Full & Download
+RewriteRule ^products/download/([0-9]*)/?(.*)$ index.php?md=products&mod=download&id=$1&QSA=$2	[NC,QSA,L]
+
+#RSS
+RewriteRule ^(products|news)/rss\.xml$ index.php?md=$1&mod=rss	[NC,QSA,L]
+
+#Nice URL option
+RewriteRule ^products/([0-9a-z\_\-\.]+)/([0-9a-z\_\-\.]+)/?(.*)$ index.php?md=products&mod=full&typeId=$1&id=$2&QSA=$3	[NC,QSA,L]
+RewriteRule ^products/([0-9a-z\_\-\.]+)/?(.*)$ index.php?md=products&typeId=$1&QSA=$2	[NC,QSA,L]
+
+#Download the attachements
+RewriteRule ^(downloads|updates|help)/download/([0-9]*)/?(.*)$ index.php?md=$1&mod=download&id=$2&QSA=$3	[NC,QSA,L]
+
+#Ticket reply mode
+RewriteRule ^tickets/reply/([0-9a-z]+)/?(.*)$ index.php?md=tickets&mod=reply&key=$1&QSA=$2	[NC,QSA,L]
+RewriteRule ^tickets/download/([0-9a-z]+)/([0-9]+)/?(.*)$ index.php?md=tickets&mod=download&key=$1&id=$2&QSA=$3	[NC,QSA,L]
+
+#Full view of modules
+RewriteRule ^(products|news|home|downloads|faq|galleries|help|tickets|updates|blog|events|poll)/([0-9]+)/?(.*)$ index.php?md=$1&mod=full&id=$2&QSA=$3	[NC,QSA,L]
+
+#List view
+RewriteRule ^(products|news|home|downloads|faq|galleries|help|tickets|updates|customers|order|blog|events|poll)/?(.*)$ index.php?md=$1&QSA=$2	[NC,QSA,L]
+
+RewriteRule ^aboutUs/?(.*)$ index.php?md=pages&name=aboutUs&QSA=$1	[NC,QSA,L]
+RewriteRule ^activation/([0-9\-]+)/?(.*)$ index.php?md=sales&mod=active&lockSerial=$1&QSA=$2	[NC,QSA,L]
+RewriteRule ^activation/?(.*)$ index.php?md=sales&mod=active&QSA=$1	[NC,QSA,L]
+
+RewriteRule ^about/?(.*)$ index.php?md=pages&name=about&QSA=$1	[NC,QSA,L]
+RewriteRule ^userDesktop/([0-9\-]+)/?$ index.php?md=sales&mod=userDesktop&serial=$1	[NC,L]
+RewriteRule ^register/([0-9A-z\-\=\+]+)/$ index.php?md=sales&mod=register&info=$1	[NC,QSA,L]
+
+RewriteRule ^upgrade/([0-9A-z\-\=\+]+)/$ index.php?md=sales&mod=upgrade&info=$1	[NC,QSA,L]
+RewriteRule ^upgradeCode/([0-9A-z\-\=\+]+)/$ index.php?md=sales&mod=upgrade&info=$1&upgradeAciveCode=1	[NC,QSA,L]
+RewriteRule ^upgradeSave/([0-9A-z\-\=\+]+)/$ index.php?md=sales&mod=upgrade&info=$1&upgradeSaveFeatures=1	[NC,QSA,L]
+
+RewriteRule ^update/lastVer/$ index.php?md=sales&mod=update&action=lastVer	[NC,QSA,L]
+RewriteRule ^update/add/([0-9A-z\-\=\+\.]+)/([0-9\-]+)/?$ index.php?md=sales&mod=update&action=add&ver=$1&serial=$2	[NC,L]
+
+
+RewriteRule ^md/aboutUs/?$ index.php?md=pages&name=aboutUs	[NC,QSA,L]
+
+#RewriteRule ^forgetPass/?(.*)$ index.php?md=users&sub=forgetPass&QSA=$1	[NC,QSA,L]
+
+#Security Captcha Code.
+RewriteRule ^cptch-([a-z_0-9]*)\.jpg$ captcha/index.php?imgId=$1	[NC,L]
+
+#RewriteRule ^rss\.xml$ ./rss.php	[NC,L,QSA]
+
+#DirectoryIndex index.php index.html
+#Options +FollowSymLinks
+
+#RewriteCond %{HTTP_REFERER} !.*98711.org* [OR]
+#RewriteCond %{HTTP_REFERER} !.*98711.ir*
+#RewriteCond %{REQUEST_URI} (.)?/?.*
+#RewriteRule (.*) intro.php [L,QSA]
+
+#RewriteCond %{HTTP_REFERER} !.*example.net.*
+#RewriteRule (.*) http://example.com/intro.html [R=301,L]
+
+RewriteRule ^intro/?(.*)$ intro.php [NC,L]
+#RewriteRule ^activation/?(.*)$ activation.php [NC,L]
+
+RewriteCond %{REQUEST_URI} !(admin|cache|ext|captcha)/?.*
+#RewriteCond %{QUERY_STRING} ^$
+RewriteRule ^(([A-Za-z0-9\-_]*)\/([^\/]*))?(.*)$ index.php?QSA=$0 [L,QSA]
+
+ServerSignature Off

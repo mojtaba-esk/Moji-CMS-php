@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:${MYSQL_VERSION}
+    container_name: mysql
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./my.cnf:/etc/my.cnf
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "3306:3306"
+
+  web:
+    image: mojiz/php:7
+    build: .
+    container_name: php_web
+    depends_on:
+      - db
+    volumes:
+      - ./www/:/var/www/html/
+    ports:
+      - "8080:80"
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: db
+      WEB_HOST: http://localhost:8080/
+    stdin_open: true
+    tty: true
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      # https://docs.phpmyadmin.net/en/latest/setup.html#docker-environment-variables
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - 8081:80
+    depends_on:
+      - db
+
+volumes:
+  db_data:

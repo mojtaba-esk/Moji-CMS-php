@@ -1,0 +1,10 @@
+body,*{
+	font-family:tahoma;
+	font-size:11pt;
+}
+.sidBr, .noPrint{ display:none;}
+
+td.tls{ visibility:hidden;}
+
+#header{ display:none; }
+/*#footer{ display:none; }*/

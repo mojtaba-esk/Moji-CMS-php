@@ -1,0 +1,113 @@
+img.cptch{
+	border:1px solid #BBB;
+	margin:0 3px -8px 3px;
+	cursor:pointer;
+}
+
+input.cptch{
+	text-transform:uppercase;
+	direction:ltr;
+	text-align:left;
+}
+
+/*<!-- Form validator*/
+
+label.error{
+	margin:2px;
+	color:red;
+	display:inline;
+	margin-right:6px;
+}
+.en label.error{ margin-left:6px;}
+
+textarea.error, input.error{
+	background-color:#FDD;
+	border:1px solid #F33;
+}
+
+div.msg{
+	display:block;
+	border:1px solid #E22;
+	background-color:#EAA;
+	text-align:center;
+	padding:3px;
+	width:70%;
+	margin: 5px auto;
+	clear: both;
+}
+/*End of Form validator-->*/
+
+/*<!-- Message Die*/
+
+div.msgD{
+	display:block;
+	border:1px solid #DDD;
+	text-align:center;
+	margin: 50px auto;
+	height:70px;
+	width:550px;
+	background-color:#EEE;
+	margin-top: 50px;
+}
+.en div.msgD{ direction:ltr;}
+
+div.msgD div{
+	margin:3px;
+	width:60px;
+	height:60px;
+}
+
+div.msgD div.txt{
+	width:auto;
+	height:auto;
+	margin:15px;
+	margin-top:20px;
+
+}
+
+.txt{
+	background: #cecece;
+}
+
+div.msgD div.info{
+	background:url( '../icn/info.png') no-repeat;
+}
+
+div.msgD div.error{
+	background:url( '../icn/error.png') no-repeat;
+}
+
+div.msgD div.warning{
+	background:url( '../icn/warning.png') no-repeat;
+}
+
+div.msgD div.question{
+	background:url( '../icn/question.png') no-repeat;
+}
+
+/*End of Message Die-->*/
+
+legend{
+	padding-right:4px; padding-left:4px;
+}
+
+.ltr{
+	text-align:left;
+	direction:ltr;
+}
+
+.rtl{
+	text-align:right;
+	direction:rtl;
+}
+
+label.chkAll{
+	color: #EE2222;
+    font-weight: bold;
+}
+
+span.srchHighL{
+	background-color:#FF0;	
+	color:#00A;
+	padding:1px;
+}

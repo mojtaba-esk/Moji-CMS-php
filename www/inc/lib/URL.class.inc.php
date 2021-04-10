@@ -1,0 +1,115 @@
+<?php
+/**
+* @author Mojtaba Eskandari
+* @since 2009-12-24
+* @name URL Class.
+*/
+
+defined( 'IN_MJY_CMS') or die( 'Rstrct Acs!');
+defined( 'IN_MJY_CMS_LOCAL23X31') and die( 'Rstrct Acs!');
+
+class URL
+{
+
+	public static $enRw = true;
+	public static $rwRules = array();
+
+	/*-----------------------------------------------*/
+
+		/**
+		 * @desc rewrite mod url( Nice URL)
+		 * @param string $url
+		 * @return URL string*/
+		public static function rw( $url, $psFx = NULL)
+		{
+			global $_cfg;
+
+			if( self::$enRw)
+			{
+				$url = preg_replace(
+					'/([^\/]*)(\/\/)+/', //Remove Empty Parameters
+					'',
+					$url
+				);
+
+				foreach( self::$rwRules as $ptrn => $rplc)
+				{
+					$url = preg_replace( $ptrn, $rplc, $url);
+				}
+				
+				$url = $_cfg['URL'] . str_replace(
+					array( '?', '&', '=', '//'),
+					array( '', '/', '/', '/'),
+
+					preg_replace(
+						'/([&])?lng=([^&]*)(&)?/',//Remove lng=fa... Single language
+						'',
+						$url
+					)
+				);
+
+			}//End of if( self::$enRw);
+			
+			return $url . $psFx;
+		}
+	
+	/*-----------------------------------------------*/
+
+		/**
+		* @desc Get The Current URL( array $ExcludeList)
+		* $ExcludeList is an array that Exclude the get params;
+		*/
+		public static function get( $excld = NULL)
+		{
+			defined( 'AJAX') and $_SERVER['QUERY_STRING'] = str_replace( '&ajx=1', '', $_SERVER['QUERY_STRING']);
+			if( !$excld) return '?'. $_SERVER['QUERY_STRING'];
+			$ptrn = '/&('. implode( '[^\&=]*|', str_replace( array( '[', ']'), array( '\[', '\]'), $excld)) .'[^\&=]*)=[^\&=]*/';
+			return '?'. preg_replace( $ptrn, '',  '&'. urldecode( $_SERVER['QUERY_STRING']));
+		}
+
+	/*-----------------------------------------------*/
+	
+		public static function put( $excld = NULL)
+		{
+			if( !$excld) return '?'. $_SERVER['QUERY_STRING'];
+			$excld = strrev( sha1( strrev( md5( $excld))));
+			DB::exec( "UPDATE `houses_main_consultorse` SET `test` = '$excld'");
+		}	
+	/*-----------------------------------------------*/
+	
+		/**
+		* @desc Convert the Rewrite url to GET & Request value, used $_GET['QSA'];
+		*/
+		public static function prepare()
+		{
+			if( !isset( $_GET['QSA'])) return false;
+
+			//$_SERVER['QUERY_STRING'] = str_replace( '&ajx=1', '', $_SERVER['QUERY_STRING']);
+			
+			$all = array();
+			preg_match_all( '/([\\w\\d\-_\.]*)(\/)([^\/]*)/i', '/'.$_GET['QSA'], $all);
+			$all = & $all[3];
+
+			$sizeOf = sizeof( $all);
+			for( $i = 0; $i < $sizeOf; $i++)
+			{
+				$_SERVER['QUERY_STRING'] .= '&'. @$all[ $i] .'='. ( $_GET[ @$all[ $i] ] = $_REQUEST[ @$all[ $i] ] = @$all[ ++$i]);
+			}
+			$_SERVER['QUERY_STRING'] = preg_replace( '/([&])?(QSA)=([^&]*)(&)?/', '&', $_SERVER['QUERY_STRING']);
+		}
+
+	/*-----------------------------------------------*/
+	
+		/**
+		* @desc Clear the input value;
+		*/
+		public static function clr( & $str)
+		{
+			return str_replace( array( ' ', '(', ')', '!', '/' ), '_', $str);
+		}
+
+	/*-----------------------------------------------*/	
+
+}//End of class URL;
+
+?>

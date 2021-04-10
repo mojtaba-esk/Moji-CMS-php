@@ -1,0 +1,133 @@
+	body {
+		font-family:tahoma;
+		background:url('bg.png'); 
+		margin:0;
+	}
+	
+#sldr{
+	text-align:center;
+	margin: 12px auto 0;
+}
+
+.coinsldr{
+	width: 928px;
+	text-align:center;
+	padding-top: 10px;
+	margin: 0 auto;
+}	
+	
+	a{
+		text-decoration:none;
+	}
+	#headBar{
+		background:#a21515;
+		height:7px;
+	}
+	#content{
+		height:1100px;
+	}
+	#mainContent{
+		border:px solid #000;		
+		margin:0 auto;	
+		width:980px;
+	}
+	#headerMenu{
+		padding-top:100px;
+	}
+	.headerBar{
+		margin:auto 25px;
+		background:#0099cc;
+		height:2px;
+
+	}
+	#buttBar{	
+		margin-top:40px;
+	}
+	#logo{
+		margin:auto 40%;
+		margin-top:-130px;
+		width:215px;
+		height:133px;
+		background:url('logo.png');
+		float:left;
+		display:inline;
+	}
+	.list{
+		font-size:14px;
+		color:#36738c;
+		margin-top:10px;
+		margin-left:50px;
+		list-style:none;
+		cursor:pointer;
+	}
+	.lstItem{
+		font-family: BYekan, B Yekan, Tahoma, Arial;
+		font-size: 16px;
+		font-weight: bold;
+		text-shadow: 0 0 1px #006446;
+		float:left;
+		margin-left:8%;
+		text-align: center;
+	}
+	
+	#quickAccess{
+		width:953px;
+		height:275px;
+		background:url('quickAccess.png');
+		margin: 0 auto;
+	}
+	#splitterTop{
+		background:url('footerBarTop.png');
+		width:1045px;
+		height:19px;
+		margin-top:60px;
+	}
+	#splitterLeft{
+		margin-left:5px;
+		background:url('footerBarSplitter.png');
+		margin-top:-10px;
+		width:19px;
+		height:282px;
+		float:left;
+	}
+	#splitterRight{
+		margin-left:5px;	
+		background:url('footerBarSplitter.png');
+		margin-top:-10px;		
+		width:19px;
+		height:282px;
+		float:left;
+	}	
+	#footer{
+		clear:both;
+		font-size:13px;
+		text-align:center;
+		
+	}	
+	#keepInTouch{
+		background:url('dartamas.png');	
+		margin-left:170px;
+		float:left;
+		width:148px;
+		height:22px;		
+	}
+	#newsLetter{
+		margin-left:210px;	
+		background:url('khabarname.png');	
+		float:left;		
+		width:84px;
+		height:19px;		
+	}
+	#mobile{
+		margin-left:70px;	
+		background:url('hamrah.png');	
+		float:left;	
+		width:212px;
+		height:24px;		
+	}
+	
+@font-face {  
+	  font-family: BYekan;  
+	  src: url(BYekan.ttf) format("truetype");  
+	} 
+		

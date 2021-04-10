@@ -1,0 +1,540 @@
+<?php
+/**
+* @author Mojtaba Eskandari
+* @since 2009-02-06
+* @name Module Admin Panel. Add and Edit The data;
+*/
+
+	defined( 'IN_MJY_CMS') or die( 'Rstrct Acs!');
+
+	lib( array(
+			'Tab',
+			'File',
+			'Img',
+			'Addable',
+		)
+	);
+	
+	//<!-- Preaper Input Object ...
+	
+		$lngs = Lang::getAll();
+		//require( $_cfg['path'] .'/inc/lib/Input.class.inc.php');
+		for( $i = 0; $i != sizeof( $lngs); $i++)
+		{
+			$lngsIds[] = $lngs[ $i ][ 'id' ];
+			$lngsTitle[ $lngs[ $i ][ 'id' ] ] = $lngs[ $i ][ 'title'];
+		}
+		$inpt = new Input( $lngsIds);
+
+	//End of Preaper Input Object -->
+
+	if( Module::$opt['imageFile'] || Module::$opt['attchmnt'])
+	{
+		$file = new File( Module::$name);
+		Module::$opt['imageFile']	and	Img::setPrfx( Module::$name);
+		Module::$opt['attchmnt']	and	$adbl = new Addable( Lang::$info, array( 'id' => 'hidden', 'attchmnt' => 'fileUpld', 'sp' => 'html'));
+	}
+
+	//<!-- Insert new rows
+	
+		if( $_GET['mod'] == 'new' && isset( $_POST['submit']))
+		{
+			$rltdId = $frstLngId = 0;
+			while( $cols = $inpt -> getRow())
+			{
+
+				//IF The Required fields are empty, ignore the insertion action.
+				if( !$cols['title']) continue;
+				
+				$cols['title']	= $inpt -> dbClr( $cols['title']);
+
+				//<!-- Preaper Related Id
+
+					/* For each Row ( rws) reset the Related Id*/
+					$frstLngId or $frstLngId = $cols['lngId'];
+					$frstLngId == $cols['lngId'] and $rltdId = 0;
+					$rltdId and $cols[ 'rltdId'] = $rltdId;
+
+				//End of Preaper Related Id-->
+
+				//$cols[ 'domId'] = $_cfg['domain']['id'];
+				$cols['isPublic']	= intval( $cols['isPublic']);
+				
+				//<!-- Copy the contents from other template...
+				
+					if( isset( $cols['tmpId']))
+					{
+						$cols['tmpId'] = intval( $cols['tmpId']);
+						//<!-- Removing current contents...
+						
+							DB::delete( array(
+									'tableName' => Module::$name . '_contents',
+									'where'	=> array(
+										'tmpId'	=> $cols[ 'id'] = intval( $cols[ 'id']),
+									),
+								)
+								//, Module::$name /* Cache Prefix*/
+							);
+							
+							//<!-- Removing current files...
+
+								//....
+
+							//-->
+
+						//-->
+						
+						//<!-- Adding New contents...
+							
+							$SQL = 'INSERT INTO
+										`'. Module::$name . '_contents`
+									SELECT
+										`name`,
+										'. $cols['id'] .',
+										`content`
+									FROM
+										`'. Module::$name . '_contents`
+									WHERE
+										`tmpId` = '. $cols['tmpId'];
+
+							DB::exec( $SQL);
+
+						//-->
+						
+						//<!-- Copying files...
+						
+							//....
+						
+						//-->
+						
+						unset( $cols['tmpId']);
+						
+					}//End of if( isset( $cols['tmpId']));
+				
+				//-->
+
+				$cols[ 'insrtTime'] = time();
+				DB::insert( array(
+						'tableName' => Module::$name . '_main',
+						'cols' => & $cols,
+					)
+					,  Module::$name /* Cache Prefix*/
+				);
+				
+				if( !$rltdId)
+				{
+
+					//Only for first rows.
+					$rltdId = DB::insrtdId();
+					DB::update( array(
+							'tableName' => Module::$name . '_main',
+							'cols' 	=> array( 'rltdId' => $rltdId),
+							'where'	=> array(
+								'id' => DB::insrtdId(),
+							),
+						)
+					);
+
+					sLog( array(
+								'itemId'	=> $rltdId,
+								'desc'		=> & $cols['title'],
+							)
+						);
+
+					//<!-- Upload The image ...
+					
+						$files = $inpt -> getFiles();
+						empty( $files) or $file -> save( $rltdId, $files[ 'image'][ 'tmp_name']);
+					
+					//End of Upload The image-->
+					
+					//<!-- Upload The Attachements ...
+
+						if( Module::$opt['attchmnt'])
+						{
+							require( 'attchmnt.inc.php');
+						
+						}//End of if( Module::$opt['attchmnt']);
+
+					//End of Upload The Attachements-->
+
+				}//End of if( !$rltdId)
+				
+				//<!-- Save the Search key words... ( Indexing)
+					
+					isset( $srch) or $srch = new Search( Module::$opt[ 'id']);
+					$srch -> setIndexes( $cols['title'], $rltdId, $cols['lngId']);
+					
+				//End of Search-->
+
+			}//End of while( $cols = $inpt -> getRow());
+			
+			msgDie( Lang::getVal( 'inserted'), './?md='. Module::$name, 1);
+			return;
+
+		}//End of if( $_GET['mod'] == 'new' && isset( $_POST));
+	
+	//End of Insert new rows -->
+
+	//<!-- Update rows
+	
+		if( $_GET['mod'] == 'edt' && isset( $_POST['submit']))
+		{
+			$rltdId = intval( $_GET['id']);
+			
+			//<!-- Upload The Attachements ...
+
+				if( Module::$opt['attchmnt'])
+				{
+					require( 'attchmnt.inc.php');
+				
+				}//End of if( Module::$opt['attchmnt']);
+
+			//End of Upload The Attachements-->
+
+			while( $cols = $inpt -> getRow())
+			{
+				isset( $cols[ 'pblishTime']) and $cols[ 'pblishTime'] = Date::mkTime( $cols[ 'pblishTime']);
+				
+				if( isset( $cols[ 'del_image']))
+				{
+					$del_image = $cols[ 'del_image'];
+					unset( $cols[ 'del_image']);
+
+				}//End of if( isset( $cols[ 'del_image']));
+
+				$cols[ 'isPublic'] = intval( @$cols[ 'isPublic']);
+				//$cols[ 'typeWrt'] = intval( @$cols[ 'typeWrt']);//Typewriter news
+
+				$cols['title']	= $inpt -> dbClr( $cols['title']);
+				
+				//<!-- Copy the contents from other template...
+				
+					if( isset( $cols['tmpId']))
+					{
+						$cols['tmpId'] = intval( $cols['tmpId']);
+						//<!-- Removing current contents...
+						
+							DB::delete( array(
+									'tableName' => Module::$name . '_contents',
+									'where'	=> array(
+										'tmpId'	=> $cols[ 'id'] = intval( $cols[ 'id']),
+									),
+								)
+								//, Module::$name /* Cache Prefix*/
+							);
+							
+							//<!-- Removing current files...
+
+								//....
+
+							//-->
+
+						//-->
+						
+						//<!-- Adding New contents...
+							
+							$SQL = 'INSERT INTO
+										`'. Module::$name . '_contents`
+									SELECT
+										`name`,
+										'. $cols['id'] .',
+										`content`
+									FROM
+										`'. Module::$name . '_contents`
+									WHERE
+										`tmpId` = '. $cols['tmpId'];
+
+							DB::exec( $SQL);
+
+						//-->
+						
+						//<!-- Copying files...
+						
+							//....
+						
+						//-->
+						
+						unset( $cols['tmpId']);
+						
+					}//End of if( isset( $cols['tmpId']));
+				
+				//-->
+
+				$cols[ 'updteTime'] = time();
+				$updRws = DB::update( array(
+						'tableName' => Module::$name . '_main',
+						'cols' 	=> & $cols,
+						'where'	=> array(
+							'id'	=> $cols[ 'id'],
+						),
+					)
+					, Module::$name /* Cache Prefix*/
+				);
+				Cache::clean( 'tpl_'. $cols[ 'id']);
+
+				if( $updRws)
+				{
+					//<!-- Upload The image ...
+						
+						if( isset( $del_image))
+						{
+							$file -> delete( $rltdId);
+						}
+						$files = $inpt -> getFiles();
+						$files['image']['name'] and $file -> save( $rltdId, $files[ 'image'][ 'tmp_name']);
+						
+					//End of Upload The image-->
+				}//End of if( $updRws);
+
+				sLog( array(
+							'itemId'	=> $cols[ 'id'],
+							'desc'		=> & $cols['title'],
+						)
+					);
+				
+				if( !$cols[ 'id'] && $cols[ 'title'])
+				{
+					$cols[ 'insrtTime'] = time();
+					$cols[ 'rltdId'] 	= $rltdId;
+					$cols[ 'domId'] = $_cfg['domain']['id'];
+
+					unset( $cols[ 'updteTime']);
+					DB::insert( array(
+							'tableName' => Module::$name . '_main',
+							'cols' => & $cols,
+						)
+						, Module::$name /* Cache Prefix*/
+					);
+
+					sLog( array(
+							'itemId'	=> DB::insrtdId(),
+							'desc'		=> & $cols['title'],
+							'action'	=> 'new',
+						)
+					);
+
+				}//End of if( !$cols[ 'id'] && $cols[ 'title']);
+				
+				//<!-- Save the Search key words... ( Indexing)
+
+					isset( $srch) or $srch = new Search( Module::$opt[ 'id']);
+					$srch -> setIndexes( $cols['title'], $rltdId, $cols['lngId']);
+
+				//End of Search-->
+
+			}//End of while( $cols = $inpt -> getRow());
+
+			msgDie( Lang::getVal( 'updated'), './'. URL::get( array( 'mod', 'id')), 1);
+			return;
+
+		}//End of if( $_GET['mod'] == 'edt' && isset( $_POST));
+	
+	//End of Update rows -->
+
+	$tpl -> set_filenames( array(
+		'edit' => Module::$name .'.admin.edit',
+		)
+	);
+
+	if( $_GET['mod'] == 'edt')
+	{
+		$rws = DB::load(
+			array( 
+				'tableName' => Module::$name . '_main',
+				'where' => array(
+					'rltdId'	=> intval( $_GET['id']),
+					//'domId'		=> $_cfg['domain']['id'],
+				),
+			)
+		);
+
+		$inpt -> setVals( $rws);//Call for Each Data Instance;
+
+	}//End of if( $_GET['mod'] == 'edt');
+
+	// $msg = 'Gholi kochooolooo';
+	
+	$tpl -> assign_vars( array(
+
+		'MESSAGE'=> @$msg,
+		
+		'SUBMIT' => Lang::getVal( 'submit'),
+		'CANCEL' => Lang::getVal( 'cancel'),
+		
+		'RETURN_URL' => '?md='. Module::$name,
+
+		)
+	);
+	
+	//<!-- Prepare Form Elements...
+
+		if( Module::$opt['imageFile'])
+		{
+			$imgSrc = $file -> getPth( intval( @$_REQUEST['id']));
+			
+			//set_time_limit(0);
+			
+	/* 		$imgSrc and $imgSrc = '../'. 
+				Img::get( $imgSrc, 
+					array( 
+						'h' => 400, //Height
+						'w' => 200, //Width
+						'wtrMrk' => array( //WaterMark
+							'img' => $_cfg[ 'path'] .'etc/watermark.png'
+							)
+						)
+					);
+	 */		
+			//$imgStrtTime = microtime();
+			
+			$imgSrc and $imgSrc = '../'. Img::get( $imgSrc, array( 'h' => 120 ));
+			
+			//$imgTimeLnt = microtime() - $imgStrtTime;
+			//printr( 'imgTimeLnt: '. $imgTimeLnt);
+			
+			$form[] = $inpt -> imgUpld( 'image', 0, $imgSrc);
+		
+		}//End of if( Module::$opt['imageFile']);
+
+		$form[] = $inpt -> hidden( 'id', $lngsIds /* can send an array of languages Ids*/);
+		//$form[] = $inpt -> hidden( 'domId', 0, $_cfg['domain']['id']);
+
+		if( $_GET['mod'] == 'edt')
+		{
+			$form[] = $inpt -> html( 'insrtTime', Lang::numFrm( Date::get( 'D d M Y G:i', $inpt -> getVal( 'insrtTime'))));
+			$form[] = $inpt -> html( 'updteTime', $inpt -> getVal( 'updteTime') ? Lang::numFrm( Date::get( 'D d M Y G:i', $inpt -> getVal( 'updteTime'))) : Lang::getVal( 'never'));
+		}
+		
+		Module::$opt['categoryMod'] and $form[] = $inpt -> dropDown( 'catId', 0, array( 
+																		'items'	=> getCats( Module::$name, Lang::viewId()), 
+																		'dir'	=> Lang::$info['dir'],
+																		'align'	=> Lang::$info['align']
+																)
+														);
+														
+		$form[] = $inpt -> chkBx( 'isPublic', 0, array( 'value' => 1, 'defChecked' => true));
+		//$form[] = $inpt -> chkBx( 'typeWrt', 0, array( 'value' => 1));//Typewriter news
+		
+		//<!-- Owner domain...
+
+				//<!-- Fetch required info...
+				
+					$pDmRws = DB::load(
+								array( 
+									'tableName' => 'domains_main',
+									'cols'	=>	array( 'name'),
+									'where' => array(
+										'rltdId'	=> $inpt -> getVal( 'ownerId'),
+									),
+								)
+							);
+					$pDmRw = & $pDmRws[0];
+			
+				//-->
+			
+				empty( $pDmRw['name']) and $pDmRw['name'] = Lang::getVal( 'nothing');
+
+				$form[] = $inpt -> hidden( 'ownerId', 0);
+				$form[] = $inpt -> html( 'ownerDmn', '<span id="ownerDmnId" class="ltr">'. $pDmRw['name'] .'</span>' .' &nbsp; [ '. $inpt -> popup( 'selectOwnerDmn', 0, array(
+																				'inpt'	=>	'ownerId', // Typically, a hidden input which is used by target page.
+																				'url'	=>	'?md=domains&mod=pop&pmd='. Module::$name .'&prntElmId=ownerDmnId', // Target page will be opened in popup.
+																				'w'		=>	700, // Popup window's width in pixel
+																				'h'		=>	500, // Popup window's height in pixel
+																			)
+																		) . ' ]'
+																	);
+			
+				unset( $pDmRws);
+
+			//-->
+		
+
+		//<!-- Prepare the Languages Tabs ...
+		
+			$tab = new Tab( $lngsTitle, Lang::viewId());
+			$form[] = '<tr><td colspan="2">'. $tab -> bar();
+
+			foreach( $lngs as $lng)
+			{
+				$form[] = $tab -> opn( $lng);
+				$form[] = $inpt -> text( 'title', $lng[ 'id'], array( 'dir' => $lng['dir'], 'align' => $lng['align'], 'size' => 40));
+				
+				$form[] = $tab -> clos();
+			}
+			$form[] = '</td></tr>';
+
+		//End of Prepare the Languages Tabs-->
+		
+		
+		//<!-- Copy From Template...
+		
+			$form[] = $inpt -> hidden( 'tmpId', 0, @$_GET['id']);
+			$form[] = $inpt -> html( 'copyFrom', '<span id="tmpTitleId"></span>' .' &nbsp; [ '. $inpt -> popup( 'selectTpl', 0, array(
+																			'inpt'	=>	'tmpId', // Typically, a hidden input which is used by target page.
+																			'url'	=>	'?md='. Module::$name .'&mod=pop&pmd='. Module::$name .'&prntElmId=tmpTitleId', // Target page will be opened in popup.
+																			'w'		=>	700, // Popup window's width in pixel
+																			'h'		=>	500, // Popup window's height in pixel
+																		)
+																	) . ' ]'
+																);
+	
+			unset( $tplRws);
+
+		//-->		
+
+		//<!-- Prepare the Attachements Form . . .
+		
+			if( Module::$opt['attchmnt'])
+			{
+				//<!-- Load the informations
+				
+					if( $_GET['mod'] == 'edt')
+					{
+						$atchRws = DB::load(
+							array( 
+								'tableName' => Module::$name . '_attachments',
+								'where' => array(
+									'itemId' => intval( $_GET['id']),
+									//'lngId'	=> Language Id,
+								),
+							)
+						);
+					
+					}//End of if( $_GET['mod'] == 'edt');
+				
+				//End of Load the informations-->
+				
+				$form[] = '<tr><td colspan="2"><fieldset><legend><img src="../etc/icn/attach.png" /> '. Lang::getVal( 'attachements') .' </legend><table>';
+
+				for( $i = 0; $i != Module::$opt['attchmnt']; $i++)
+				{
+					$adbl -> add( array( 
+							'id'			=> @$atchRws[ $i ][ 'id' ],
+							//'lngId'		=> @$atchRws[ $i ][ 'lngId' ],
+							'attchmnt'	=> @$atchRws[ $i ][ 'fileName' ],
+							'sp'			=> '<tr><td colspan="2"><hr /></td></tr>',
+						)
+					);
+
+				}//End of for( $i = 0; $i != Module::$opt['attchmnt']; $i++);
+
+				$form[] = $adbl -> getHTML();
+				$form[] = '</table></fieldset></td><tr>';
+
+			}//End of if( Module::$opt['attchmnt']);
+
+		//End of Prepare the Attachements Form-->
+
+		for( $i = 0; $i != sizeof( $form); $i++)
+		{
+			$tpl -> assign_block_vars( 'myblck',  array(
+					'INPUT' => & $form[ $i]
+				)
+			);
+		}
+
+	//End of Prepare Form Elements, and sent to Template-->
+
+	$tpl -> display( 'edit');
+?>
