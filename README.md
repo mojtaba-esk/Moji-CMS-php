@@ -7,7 +7,7 @@ I just put it together in a docker container format so it can be easier to use.
 ![Admin panel](assets/07.adminPage.png "Admin panel")
 
 
-# Installation
+### Installation
 
 sudo chmod 0777 -R ./www/cache/
 
