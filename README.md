@@ -13,6 +13,7 @@ I just put it together in a docker compose format so it can be easier to use.
 - Supports multiple languages both for content and labels
 - Support multiple domains in such a way that several domains can be parkes on the same host and different content will show for each with dedicated template and all can be managed through one admin panel
 - Data Export and Import
+- Autonomous Cache system for database queries and templates
 
 ### Installation
 
